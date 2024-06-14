@@ -1,0 +1,17 @@
+//@version=5
+strategy("Moving Average Optimization Strategy", overlay=true)
+
+// Define the range of periods to test
+start_period = input.int(10, "Start Period")
+end_period = input.int(50, "End Period")
+step_size = input.int(5, "Step Size")
+
+// Define other parameters
+stop_loss = input.float(0.02, "Stop Loss")
+take_profit = input.float(0.03, "Take Profit")
+
+// Define strategy logic
+for period = start_period to end_period by step_size
+    ma = ta.sma(close, period)
+    strategy.entry("Buy", strategy.long, when = close > ma)
+    strategy.exit("Sell", "Buy", stop = close * (1 - stop_loss), limit = close * (1 + take_profit))
