@@ -1,0 +1,31 @@
+//@version=5
+indicator("EMA + RSI + Session Expiry", overlay=true)
+
+emaLength = input.int(30, title="EMA Length", minval=1)
+emaColor = input.color(color.blue, title="EMA Color")
+
+rsiPeriod = input.int(14, title="RSI Period", minval=1)
+rsiOverbought = input.int(75, title="RSI Overbought Level", minval=50, maxval=100)
+
+sessionStartHour = input.int(9, title="Session Start Hour (24h)")
+sessionStartMinute = input.int(30, title="Session Start Minute")
+sessionEndHour = input.int(16, title="Session End Hour (24h)")
+sessionEndMinute = input.int(0, title="Session End Minute")
+highlightColor = input.color(color.new(color.yellow, 80), title="Session Highlight Color")
+
+emaLine = ta.ema(close, emaLength)
+plot(emaLine, title="30 EMA", color=emaColor, linewidth=2)
+
+rsiValue = ta.rsi(close, rsiPeriod)
+
+rsiOverboughtCross = ta.crossover(rsiValue, rsiOverbought)
+rsiOverboughtAlert = ta.crossunder(rsiValue, rsiOverbought)
+
+plotshape(rsiOverboughtCross, title="RSI Overbought Cross", location=location.abovebar, color=color.red, style=shape.triangledown, size=size.small)
+plotshape(rsiOverboughtAlert, title="RSI Overbought Alert", location=location.abovebar, color=color.green, style=shape.triangleup, size=size.small)
+
+inSession = (hour >= sessionStartHour and minute >= sessionStartMinute) and (hour < sessionEndHour or (hour == sessionEndHour and minute <= sessionEndMinute))
+bgcolor(inSession ? highlightColor : na)
+
+alertcondition(rsiOverboughtCross, title="RSI Crossed Above 75", message="RSI has crossed above 75!")
+alertcondition(rsiOverboughtAlert, title="RSI Crossed Below 75", message="RSI has crossed below 75!")
